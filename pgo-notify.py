@@ -84,7 +84,7 @@ def parse_file(src_path):
         for row in csvf:
             if (float(row['Time']) + float(row['Time2Hidden']) > time.time() and
                     row['encounterID'] not in known_encounters):
-                log.debug('New encounter: ', row['encounterID'])
+                log.debug('New encounter: %s', row['encounterID'])
                 known_encounters.append(row['encounterID'])
                 check_encounter(row)
 
@@ -94,7 +94,7 @@ def check_encounter(encounter):
         dist = distance((float(spot['latitude']),float(spot['longitude'])),
                 (float(encounter['lat']), float(encounter['lng'])))
         if dist < float(config['max_distance']):
-            log.debug('Encounter near ', spot['name'])
+            log.debug('Encounter near %s', spot['name'])
             send_message(spot['chat_id'], encounter)
 
 def send_message(chat_id, encounter):
