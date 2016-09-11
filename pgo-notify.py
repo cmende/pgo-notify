@@ -91,9 +91,9 @@ def parse_file(src_path):
 def check_encounter(encounter):
     global config
     for spot in config['spots']:
-        distance = distance((float(spot['latitude']),float(spot['longitude'])),
+        dist = distance((float(spot['latitude']),float(spot['longitude'])),
                 (float(encounter['lat']), float(encounter['lng'])))
-        if distance < float(config['max_distance']):
+        if dist < float(config['max_distance']):
             log.debug('Encounter near ', spot['name'])
             send_message(spot['chat_id'], encounter)
 
