@@ -1,0 +1,4 @@
+geopy==1.11.0
+python-telegram-bot==5.0.0
+PyYAML==3.12
+watchdog==0.8.3

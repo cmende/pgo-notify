@@ -1,0 +1,14 @@
+# Telegram bot API token
+api_token: insert_api_token_here
+
+# logging level (DEBUG, INFO, WARNING, ERROR or CRITICAL)
+loglevel: WARNING
+
+# max distance in km as float (e.g. 2.5)
+max_distance: 2.5
+
+spots:
+  - name: spot_name
+    latitude: 1.23456
+    longitude: 9.87654
+    chat_id: 1234567
