@@ -14,6 +14,7 @@
 
 import csv
 import logging
+import os
 import telegram
 import time
 import yaml
@@ -47,12 +48,17 @@ def main():
 
 def load_config():
     global config, log
-    stream = open('config.yaml')
+
+    dirname = os.path.dirname(__file__)
+    config_path = '{}/config.yaml'.format(dirname)
+    stream = open(config_path)
     config = yaml.load(stream)
+
     loglevel = getattr(logging, config['loglevel'].upper())
     log = logging.getLogger('pgo-notify')
     log.setLevel(loglevel)
-    handler = logging.FileHandler('pgo-notify.log', mode='w')
+    logfile_path = '{}/pgo-notify.log'.format(dirname)
+    handler = logging.FileHandler(logfile_path, mode='w')
     formatter = logging.Formatter('%(asctime)s %(message)s')
     handler.setFormatter(formatter)
     log.addHandler(handler)
