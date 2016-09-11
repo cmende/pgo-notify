@@ -82,9 +82,12 @@ def parse_file(src_path):
     with open(src_path) as f:
         csvf = csv.DictReader(f, delimiter='\t')
         for row in csvf:
-            if (float(row['Time']) + float(row['Time2Hidden']) > time.time() and
+            time_hidden = float(row['Time']) + float(row['Time2Hidden'])
+            now = time.time() * 1000
+            if (time_hidden > now and
                     row['encounterID'] not in known_encounters):
-                log.debug('New encounter: %s', row['encounterID'])
+                log.debug('New encounter: %s, time_hidden: %f, time: %f',
+                        row['encounterID'], time_hidden, now)
                 known_encounters.append(row['encounterID'])
                 check_encounter(row)
 
