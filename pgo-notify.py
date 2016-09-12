@@ -102,8 +102,9 @@ def check_encounter(encounter):
 
 def send_message(chat_id, encounter):
     global bot
-    disappears_at = datetime.fromtimestamp(int(encounter['Time']) +
-            int(encounter['Time2Hidden']))
+    disappears_at_epoch = (int(encounter['Time']) +
+            int(encounter['Time2Hidden'])) / 1000
+    disappears_at = datetime.fromtimestamp(disappears_at_epoch)
     text = "*{} found*\ndisappears at: {}".format(encounter['Name'],
             disappears_at.strftime('%H:%M:%S'))
     bot.sendMessage(chat_id=chat_id, text=text, parse_mode='Markdown')
