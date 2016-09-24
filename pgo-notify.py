@@ -24,7 +24,7 @@ from geopy.distance import distance
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 bot = None
-config = None
+config = {}
 log = None
 pokemon = None
 
@@ -49,7 +49,12 @@ def load_config():
     dirname = os.path.dirname(__file__)
     config_path = '{}/config.yaml'.format(dirname)
     stream = open(config_path)
-    config = yaml.load(stream)
+    config_yaml = yaml.load(stream)
+
+    config['api_token'] = config_yaml['api_token']
+    config['loglevel'] = config_yaml.get('loglevel', 'WARNING')
+    config['max_distance'] = float(config_yaml.get('max_distance', '2.5'))
+    config['spots'] = config_yaml.get('spots', [])
 
     loglevel = getattr(logging, config['loglevel'].upper())
     log = logging.getLogger('pgo-notify')
@@ -89,7 +94,7 @@ def check_encounter(encounter):
     for spot in config['spots']:
         dist = distance((float(spot['latitude']),float(spot['longitude'])),
                 (float(encounter['latitude']), float(encounter['longitude'])))
-        if dist.km < float(config['max_distance']):
+        if dist.km < config['max_distance']:
             log.debug('Encounter near %s', spot['name'])
             send_message(spot['chat_id'], encounter)
 
