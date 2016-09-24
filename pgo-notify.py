@@ -16,12 +16,13 @@ import csv
 import json
 import logging
 import os
-import telegram
 import time
-import yaml
 from datetime import datetime
-from geopy.distance import distance
 from http.server import HTTPServer, BaseHTTPRequestHandler
+
+import telegram
+import yaml
+from geopy.distance import distance
 
 bot = None
 config = {}
@@ -101,7 +102,7 @@ def check_encounter(encounter):
         # check distance
         spot_loc = (float(spot['latitude']), float(spot['longitude']))
         encounter_loc = (float(encounter['latitude']),
-                float(encounter['longitude']))
+                         float(encounter['longitude']))
         dist = distance(spot_loc, encounter_loc).km
         if dist < config['max_distance']:
             log.debug('Encounter near %s', spot['name'])
@@ -110,13 +111,14 @@ def check_encounter(encounter):
 def send_message(chat_id, encounter):
     pokemon_name = pokemon[str(encounter['pokemon_id'])]
     disappears_at = datetime.fromtimestamp(encounter['disappear_time'])
-    text = "*{} found*\ndisappears at: {}".format(pokemon_name,
-            disappears_at.strftime('%H:%M:%S'))
+    text = "*{} found*\ndisappears at: {}".format(
+            pokemon_name, disappears_at.strftime('%H:%M:%S'))
     if 'respawn_info' in encounter:
         text = "{}\n{}".format(text, encounter['respawn_info'])
     bot.sendMessage(chat_id=chat_id, text=text, parse_mode='Markdown')
     bot.sendLocation(chat_id=chat_id, latitude=encounter['latitude'],
-            longitude=encounter['longitude'], disable_notification=True)
+                     longitude=encounter['longitude'],
+                     disable_notification=True)
 
 if __name__ == '__main__':
     main()
