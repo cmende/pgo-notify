@@ -40,7 +40,10 @@ def main():
     load_config()
     load_i18n()
     start_bot()
-    start_httpd()
+    try:
+        start_httpd()
+    except KeyboardInterrupt:
+        log.info('Shutting down')
 
 def load_config():
     global config, log
