@@ -45,7 +45,7 @@ def main():
 def load_config():
     global config, log
 
-    dirname = os.path.dirname(__file__)
+    dirname = os.path.dirname(os.path.realpath(__file__))
     config_path = '{}/config.yaml'.format(dirname)
     stream = open(config_path)
     config_yaml = yaml.load(stream)
