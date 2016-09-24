@@ -93,9 +93,11 @@ def parse_json(body):
 def check_encounter(encounter):
     global config
     for spot in config['spots']:
-        dist = distance((float(spot['latitude']),float(spot['longitude'])),
-                (float(encounter['latitude']), float(encounter['longitude'])))
-        if dist.km < config['max_distance']:
+        spot_loc = (float(spot['latitude']), float(spot['longitude']))
+        encounter_loc = (float(encounter['latitude']),
+                float(encounter['longitude']))
+        dist = distance(spot_loc, encounter_loc).km
+        if dist < config['max_distance']:
             log.debug('Encounter near %s', spot['name'])
             send_message(spot['chat_id'], encounter)
 
