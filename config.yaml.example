@@ -1,13 +1,13 @@
 # Telegram bot API token
 api_token: insert_api_token_here
 
-# Language, see i18n folder for possible values
+# Language, see i18n folder for possible values (default: en)
 lang: en
 
-# logging level (DEBUG, INFO, WARNING, ERROR or CRITICAL)
+# logging level (DEBUG, INFO, WARNING, ERROR or CRITICAL) (default: WARNING)
 loglevel: WARNING
 
-# max distance in km as float (e.g. 2.5)
+# max distance in km as float (default: 2.5)
 max_distance: 2.5
 
 # server address (default: 'localhost')
