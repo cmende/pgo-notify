@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import csv
+import json
 import logging
 import os
 import telegram
@@ -20,31 +21,27 @@ import time
 import yaml
 from datetime import datetime
 from geopy.distance import distance
-from watchdog.events import PatternMatchingEventHandler
-from watchdog.observers import Observer
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 bot = None
 config = None
 log = None
-known_encounters = []
-observer = None
+pokemon = None
 
-class EventHandler(PatternMatchingEventHandler):
-    def on_modified(self, event):
-        parse_file(event.src_path)
+class RequestHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        length = int(self.headers['content-length'])
+        body = self.rfile.read(length)
+        parse_json(body)
+        self.send_response(200)
+        self.end_headers()
 
 def main():
-    global log, observer
+    global log
     load_config()
+    load_i18n()
     start_bot()
-    start_observer()
-    log.info('Startup complete')
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+    start_httpd()
 
 def load_config():
     global config, log
@@ -64,52 +61,49 @@ def load_config():
     log.addHandler(handler)
     log.addFilter(logging.Filter('pgo-notify'))
 
+def load_i18n():
+    global pokemon
+    dirname = os.path.dirname(os.path.realpath(__file__))
+    # TODO: configurable language
+    lang = 'de'
+    i18nfile_path = '{}/i18n/pokemon.{}.json'.format(dirname, lang)
+    with open(i18nfile_path) as f:
+        pokemon = json.load(f)
+
 def start_bot():
     global bot, config
     bot = telegram.Bot(token=config['api_token'])
 
-def start_observer():
-    global observer
-    event_handler = EventHandler(patterns=['*.txt'],
-            ignore_directories=True)
-    observer = Observer()
-    observer.schedule(event_handler, '.')
-    observer.start()
+def start_httpd():
+    # TODO: configurable ip/port
+    httpd = HTTPServer(('', 8000), RequestHandler)
+    httpd.serve_forever()
 
-def parse_file(src_path):
-    global known_encounters, log
-    log.debug('Spawns file changed')
-    with open(src_path) as f:
-        csvf = csv.DictReader(f, delimiter='\t')
-        for row in csvf:
-            time_hidden = float(row['Time']) + float(row['Time2Hidden'])
-            now = time.time() * 1000
-            if (time_hidden > now and
-                    row['encounterID'] not in known_encounters):
-                log.debug('New encounter: %s, time_hidden: %f, time: %f',
-                        row['encounterID'], time_hidden, now)
-                known_encounters.append(row['encounterID'])
-                check_encounter(row)
+def parse_json(body):
+    message = json.loads(body.decode('utf-8'))
+    if message['type'] == 'pokemon':
+        check_encounter(message['message'])
 
 def check_encounter(encounter):
     global config
     for spot in config['spots']:
         dist = distance((float(spot['latitude']),float(spot['longitude'])),
-                (float(encounter['lat']), float(encounter['lng'])))
-        if dist < float(config['max_distance']):
+                (float(encounter['latitude']), float(encounter['longitude'])))
+        if dist.km < float(config['max_distance']):
             log.debug('Encounter near %s', spot['name'])
             send_message(spot['chat_id'], encounter)
 
 def send_message(chat_id, encounter):
     global bot
-    disappears_at_epoch = (int(encounter['Time']) +
-            int(encounter['Time2Hidden'])) / 1000
-    disappears_at = datetime.fromtimestamp(disappears_at_epoch)
-    text = "*{} found*\ndisappears at: {}".format(encounter['Name'],
+    pokemon_name = pokemon[str(encounter['pokemon_id'])]
+    disappears_at = datetime.fromtimestamp(encounter['disappear_time'])
+    text = "*{} found*\ndisappears at: {}".format(pokemon_name,
             disappears_at.strftime('%H:%M:%S'))
+    if 'respawn_info' in encounter:
+        text = "{}\n{}".format(text, encounter['respawn_info'])
     bot.sendMessage(chat_id=chat_id, text=text, parse_mode='Markdown')
-    bot.sendLocation(chat_id=chat_id, latitude=encounter['lat'],
-            longitude=encounter['lng'], disable_notification=True)
+    bot.sendLocation(chat_id=chat_id, latitude=encounter['latitude'],
+            longitude=encounter['longitude'], disable_notification=True)
 
 if __name__ == '__main__':
     main()
