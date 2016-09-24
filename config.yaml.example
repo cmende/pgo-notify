@@ -10,6 +10,12 @@ loglevel: WARNING
 # max distance in km as float (e.g. 2.5)
 max_distance: 2.5
 
+# server address (default: 'localhost')
+server_address: localhost
+
+# server port (default: 4000)
+server_port: 4000
+
 spots:
   - name: spot_name
     latitude: 1.23456

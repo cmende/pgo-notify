@@ -55,6 +55,8 @@ def load_config():
     config['lang'] = config_yaml.get('lang', 'en')
     config['loglevel'] = config_yaml.get('loglevel', 'WARNING')
     config['max_distance'] = float(config_yaml.get('max_distance', '2.5'))
+    config['server_address'] = config_yaml.get('server_address', 'localhost')
+    config['server_port'] = int(config_yaml.get('server_port', '4000'))
     config['spots'] = config_yaml.get('spots', [])
 
     loglevel = getattr(logging, config['loglevel'].upper())
@@ -79,8 +81,8 @@ def start_bot():
     bot = telegram.Bot(token=config['api_token'])
 
 def start_httpd():
-    # TODO: configurable ip/port
-    httpd = HTTPServer(('', 8000), RequestHandler)
+    server_address = (config['server_address'], config['server_port'])
+    httpd = HTTPServer(server_address, RequestHandler)
     httpd.serve_forever()
 
 def parse_json(body):
