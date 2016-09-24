@@ -37,7 +37,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 def main():
-    global log
     load_config()
     load_i18n()
     start_bot()
@@ -77,7 +76,7 @@ def load_i18n():
         pokemon = json.load(f)
 
 def start_bot():
-    global bot, config
+    global bot
     bot = telegram.Bot(token=config['api_token'])
 
 def start_httpd():
@@ -91,7 +90,6 @@ def parse_json(body):
         check_encounter(message['message'])
 
 def check_encounter(encounter):
-    global config
     for spot in config['spots']:
         spot_loc = (float(spot['latitude']), float(spot['longitude']))
         encounter_loc = (float(encounter['latitude']),
@@ -102,7 +100,6 @@ def check_encounter(encounter):
             send_message(spot['chat_id'], encounter)
 
 def send_message(chat_id, encounter):
-    global bot
     pokemon_name = pokemon[str(encounter['pokemon_id'])]
     disappears_at = datetime.fromtimestamp(encounter['disappear_time'])
     text = "*{} found*\ndisappears at: {}".format(pokemon_name,
