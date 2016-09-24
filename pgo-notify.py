@@ -52,6 +52,7 @@ def load_config():
     config_yaml = yaml.load(stream)
 
     config['api_token'] = config_yaml['api_token']
+    config['lang'] = config_yaml.get('lang', 'en')
     config['loglevel'] = config_yaml.get('loglevel', 'WARNING')
     config['max_distance'] = float(config_yaml.get('max_distance', '2.5'))
     config['spots'] = config_yaml.get('spots', [])
@@ -69,9 +70,7 @@ def load_config():
 def load_i18n():
     global pokemon
     dirname = os.path.dirname(os.path.realpath(__file__))
-    # TODO: configurable language
-    lang = 'de'
-    i18nfile_path = '{}/i18n/pokemon.{}.json'.format(dirname, lang)
+    i18nfile_path = '{}/i18n/pokemon.{}.json'.format(dirname, config['lang'])
     with open(i18nfile_path) as f:
         pokemon = json.load(f)
 
