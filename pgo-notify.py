@@ -91,6 +91,11 @@ def parse_json(body):
 
 def check_encounter(encounter):
     for spot in config['spots']:
+        # check notification settings
+        if encounter['pokemon_id'] not in spot['notify_ids']:
+            continue
+
+        # check distance
         spot_loc = (float(spot['latitude']), float(spot['longitude']))
         encounter_loc = (float(encounter['latitude']),
                 float(encounter['longitude']))
